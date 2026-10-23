@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اختبار: سبب إجابة الدعاء</title>
+<style>
+:root{--bg:#f3f6f4;--card:#fff;--ink:#17302a;--mute:#5d726b;--line:#d3ded9;--accent:#1f6f5c;--ok:#1b7a43;--okbg:#e2f3e8;--bad:#a8322d;--badbg:#f9e4e2}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1a17;--card:#17261f;--ink:#e6efeb;--mute:#9bb0a8;--line:#2b4037;--accent:#5fc2a5;--ok:#6fd49a;--okbg:#17382a;--bad:#f08a84;--badbg:#3a1f1d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Naskh Arabic","Amiri","Traditional Arabic",Tahoma,serif;font-size:19px;line-height:1.9;padding:16px}
+main{max-width:680px;margin:0 auto}
+h1{font-size:1.5rem;margin:8px 0 4px}
+.sub{color:var(--mute);font-size:.9rem;margin:0 0 16px}
+.bar{height:8px;background:var(--line);border-radius:8px;overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.meta{color:var(--mute);font-size:.85rem;margin-bottom:6px}
+.q{font-size:1.15rem;font-weight:700;margin:0 0 14px}
+.opt{display:block;width:100%;text-align:right;font:inherit;color:inherit;background:transparent;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,input:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.bad{background:var(--badbg);border-color:var(--bad)}
+input[type=text]{width:100%;font:inherit;color:inherit;background:transparent;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px}
+.btn{font:inherit;font-weight:700;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:9px 22px;margin-top:12px;cursor:pointer}
+@media (prefers-color-scheme:dark){.btn{color:#0f1a17}}
+.fb{margin-top:14px;padding:10px 14px;border-radius:10px;font-size:.95rem}
+.fb.ok{background:var(--okbg);color:var(--ok)}
+.fb.bad{background:var(--badbg);color:var(--bad)}
+.score{font-size:2.6rem;font-weight:700;margin:6px 0}
+.rev{border-top:1px solid var(--line);padding:10px 0;font-size:.95rem}
+</style>
+</head>
+<body>
+<main>
+<h1>اختبار: سبب إجابة الدعاء</h1>
+<p class="sub">حديث أبي هريرة رضي الله عنه: «إن الله طيب لا يقبل إلا طيباً»</p>
+<div class="bar"><i id="bar"></i></div>
+<div class="card" id="box" aria-live="polite"></div>
+</main>
+
+<script>
+/* ===== أسئلة الاختبار =====
+type: mc = اختيار من متعدد | tf = صح/خطأ | txt = إجابة كتابية (تقبل الإجابات القريبة)
+في الأسئلة الكتابية: ans = قائمة بالإجابات المقبولة، ويُقبل ما يشبهها أو يحوي كلمة مفتاحية منها */
+const Q = [
+ {type:"mc", q:"ما معنى «إن الله تعالى طيب»؟", o:["كثير العطاء","مقدس منزه عن النقائص والعيوب","حسن الصورة","سهل القبول"], a:1},
+ {type:"tf", q:"يقبل الله من الأعمال ما كان خالياً من الرياء والعجب وغيرهما من المفسدات.", a:true},
+ {type:"txt", q:"ما معنى كلمة «أشعث»؟", ans:["جعد الرأس","مغبر الشعر","شعره غير مرتب"], hint:"جعد الرأس"},
+ {type:"mc", q:"ما معنى «أغبر»؟", o:["مغبر اللون لطول سفره","كثير الشعر","حزين","فقير"], a:0},
+ {type:"txt", q:"ما معنى «فأنى يستجاب له»؟", ans:["من أين يستجاب لمن هذه صفته","كيف يستجاب له","استبعاد الإجابة"], hint:"من أين يستجاب لمن هذه صفته؟"},
+ {type:"tf", q:"طول السفر من أسباب عدم استجابة الدعاء.", a:false, why:"بل هو من أسباب الإجابة، لأنه يؤدي إلى انكسار النفس."},
+ {type:"mc", q:"لماذا يكون السفر من أعظم أسباب الإجابة؟", o:["لأنه يمنح المال","بسبب انكسار النفس من طول الغربة وتحمل المشاق","لأنه يزيد العلم","لأنه يقلل الذنوب"], a:1},
+ {type:"txt", q:"اذكر شيئاً من الحرام جاء في الحديث سبباً لعدم إجابة الدعاء.", ans:["المطعم","المشرب","الملبس","الأكل","الشرب","اللبس","الغذاء"], hint:"المطعم أو المشرب أو الملبس أو الغذاء بالحرام"},
+ {type:"mc", q:"أيّ الآتي ليس من أسباب استجابة الدعاء المذكورة في فوائد الحديث؟", o:["مد اليدين إلى السماء","الإلحاح في الدعاء","إطابة المطعم والمشرب والملبس","كثرة الأموال"], a:3},
+ {type:"txt", q:"ما الآية التي استشهد بها النبي ﷺ لأمر المرسلين، وفي أي سورة؟ (اذكر اسم السورة)", ans:["المؤمنون","سورة المؤمنون"], hint:"سورة المؤمنون، الآية 51: «يا أيها الرسل كلوا من الطيبات واعملوا صالحاً»"},
+ {type:"tf", q:"استشهد النبي ﷺ بآية من سورة البقرة لأمر المؤمنين بالأكل من الطيبات.", a:true, why:"البقرة، الآية 172."},
+ {type:"mc", q:"ما حكم الله في أمر المؤمنين والمرسلين بالطيبات؟", o:["أمر المؤمنين بما أمر به المرسلين","أمر المرسلين فقط","أمر المؤمنين فقط","لم يأمر بشيء"], a:0},
+ {type:"txt", q:"ما الصفات التي ذُكرت عن الرجل الذي يطيل السفر في الحديث؟ اذكر إحداها.", ans:["أشعث","أغبر","يمد يديه إلى السماء","يطيل السفر","يقول يا رب"], hint:"أشعث، أغبر، يمد يديه إلى السماء، يقول: يا رب يا رب"},
+ {type:"mc", q:"من رواه؟", o:["البخاري","مسلم","الترمذي","أبو داود"], a:1},
+ {type:"txt", q:"ما معنى الإلحاح بالدعاء كما في الفوائد؟", ans:["الإلحاح بالدعاء والعزم في المسألة","العزم في المسألة","تكرار الدعاء","قول يا رب يا رب"], hint:"الإلحاح بالدعاء والعزم في المسألة"}
+];
+
+/* ===== أدوات المطابقة التقريبية ===== */
+function norm(s){
+  return s.replace(/[\u064B-\u0652\u0640\u0670]/g,"")
+    .replace(/[إأآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/ؤ/g,"و").replace(/ئ/g,"ي")
+    .replace(/[^\u0600-\u06FFa-zA-Z0-9\s]/g,"").replace(/\b(ال)/g,"").replace(/ال(?=\S{3,})/g,"")
+    .replace(/\s+/g," ").trim();
+}
+function lev(a,b){
+  const m=a.length,n=b.length; if(!m) return n; if(!n) return m;
+  let p=Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){
+    const c=[i];
+    for(let j=1;j<=n;j++) c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));
+    p=c;
+  }
+  return p[n];
+}
+function sim(a,b){const L=Math.max(a.length,b.length);return L?1-lev(a,b)/L:1}
+function close(user,answers){
+  const u=norm(user); if(u.length<2) return false;
+  return answers.some(raw=>{
+    const a=norm(raw);
+    if(u===a||sim(u,a)>=0.72) return true;
+    // تضمّن كلمة مفتاحية، أو تشابه كلمة بكلمة
+    if(a.length>=3 && u.includes(a)) return true;
+    const aw=a.split(" "), uw=u.split(" ");
+    const hit=aw.filter(w=>w.length>2 && uw.some(x=>sim(x,w)>=0.75)).length;
+    const need=aw.filter(w=>w.length>2).length;
+    return need>0 && hit/need>=0.6;
+  });
+}
+
+/* ===== المنطق ===== */
+let i=0, score=0, wrong=[];
+const box=document.getElementById("box"), bar=document.getElementById("bar");
+const el=(h)=>{box.innerHTML=h};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const order=Q.map((_,k)=>k).sort(()=>Math.random()-.5);
+
+function show(){
+  if(i>=Q.length) return end();
+  bar.style.width=(i/Q.length*100)+"%";
+  const q=Q[order[i]];
+  let h=`<div class="meta">السؤال ${i+1} من ${Q.length}</div><p class="q">${esc(q.q)}</p>`;
+  if(q.type==="mc") h+=q.o.map((t,k)=>`<button class="opt" data-k="${k}">${esc(t)}</button>`).join("");
+  else if(q.type==="tf") h+=`<button class="opt" data-k="1">صح</button><button class="opt" data-k="0">خطأ</button>`;
+  else h+=`<input type="text" id="t" autocomplete="off" placeholder="اكتب إجابتك هنا"><br><button class="btn" id="chk">تحقق</button>`;
+  h+=`<div id="fb"></div>`;
+  el(h);
+  if(q.type==="txt"){
+    const t=document.getElementById("t"); t.focus();
+    const go=()=>finish(q,close(t.value,q.ans),t.value);
+    document.getElementById("chk").onclick=go;
+    t.onkeydown=e=>{if(e.key==="Enter")go()};
+  } else box.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    const k=+b.dataset.k;
+    const ok=q.type==="mc"?k===q.a:(k===1)===q.a;
+    box.querySelectorAll(".opt").forEach(x=>{
+      x.disabled=true;
+      const xk=+x.dataset.k;
+      const right=q.type==="mc"?xk===q.a:(xk===1)===q.a;
+      if(right) x.classList.add("ok");
+    });
+    if(!ok) b.classList.add("bad");
+    finish(q,ok,b.textContent);
+  });
+}
+function correct(q){
+  return q.type==="mc"?q.o[q.a]:q.type==="tf"?(q.a?"صح":"خطأ"):q.hint;
+}
+function finish(q,ok,given){
+  if(ok) score++; else wrong.push({q:q.q,a:correct(q),g:given});
+  const t=document.getElementById("t"); if(t) t.disabled=true;
+  const c=document.getElementById("chk"); if(c) c.remove();
+  let msg=ok?"إجابة صحيحة ✓":"الإجابة الصحيحة: "+correct(q);
+  if(q.why) msg+=" — "+q.why;
+  document.getElementById("fb").innerHTML=`<div class="fb ${ok?"ok":"bad"}">${esc(msg)}</div><button class="btn" id="nx">${i+1===Q.length?"النتيجة":"التالي"}</button>`;
+  const nx=document.getElementById("nx"); nx.focus();
+  nx.onclick=()=>{i++;show()};
+}
+function end(){
+  bar.style.width="100%";
+  const p=Math.round(score/Q.length*100);
+  const m=p>=90?"ممتاز، بارك الله فيك":p>=70?"جيد جداً":p>=50?"جيد، راجع الأخطاء":"أعد قراءة الحديث وحاول مجدداً";
+  el(`<div class="meta">انتهى الاختبار</div><div class="score">${score} / ${Q.length}</div><p>${m} (${p}%)</p>`
+   +wrong.map(w=>`<div class="rev"><b>${esc(w.q)}</b><br>إجابتك: ${esc(w.g||"—")}<br>الصحيح: ${esc(w.a)}</div>`).join("")
+   +`<button class="btn" onclick="location.reload()">إعادة الاختبار</button>`);
+}
+show();
+</script>
+</body>
+</html>
